@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/character_info_navigation"
+    app:startDestination="@id/character_info_fragment">
+
+    <fragment
+        android:id="@+id/character_info_fragment"
+        android:name="com.example.rmpet.charecterinfo.ui.CharacterInfoFragment"
+        android:label="@string/character_info_fragment_navigation_label"
+        tools:layout="@layout/fragment_character_info"
+        />
+
+</navigation>
