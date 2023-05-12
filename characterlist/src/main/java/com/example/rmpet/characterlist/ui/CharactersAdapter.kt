@@ -6,12 +6,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.rmpet.characterlist.R
 import com.example.rmpet.characterlist.databinding.ListItemCharacterBinding
+import com.example.rmpet.characterlist.domain.CharacterData
+import com.example.rmpet.characterlist.domain.CharacterGender
+import com.example.rmpet.characterlist.domain.CharacterStatus
 
 class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.Holder>() {
 
-    private var data: List<CharacterModel> = listOf()
+    private var data: List<CharacterData> = listOf()
 
-    fun setCharacters(newData: List<CharacterModel>) {
+    fun setCharacters(newData: List<CharacterData>) {
         data = newData
         notifyDataSetChanged()
     }
@@ -32,7 +35,7 @@ class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.Holder>() {
 
     class Holder(private val binding: ListItemCharacterBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(model: CharacterModel) {
+        fun bind(model: CharacterData) {
             binding.listItemCharacterName.text = model.name
             binding.listItemCharacterSpecies.text = model.species
             binding.listItemCharacterGender.setImageResource(getGenderImage(model.gender))
@@ -47,7 +50,7 @@ class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.Holder>() {
             CharacterGender.UNKNOWN -> R.drawable.ic_unknown
         }
 
-        private fun getCharacterStatus(status: CharacterStatus): Int = when(status) {
+        private fun getCharacterStatus(status: CharacterStatus): Int = when (status) {
             CharacterStatus.ALIVE -> R.drawable.ic_status_alive
             CharacterStatus.DEAD -> R.drawable.ic_status_dead
             CharacterStatus.UNKNOWN -> R.drawable.ic_unknown

@@ -5,21 +5,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.rmpet.characterlist.data.remote.CharacterListEndpoint
 import com.example.rmpet.characterlist.databinding.FragmentCharacterListBinding
-import com.example.rmpet.characterlist.di.CharacterListComponentProvider
-import kotlinx.coroutines.Dispatchers
+import com.example.rmpet.characterlist.domain.CharacterData
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import javax.inject.Inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CharacterListFragment : Fragment() {
 
-    @Inject
-    lateinit var retrofit: Retrofit
+    private val characterViewModel: CharacterViewModel by viewModel()
+    private val characterAdapter = CharactersAdapter()
     private var _binding: FragmentCharacterListBinding? = null
     private val binding: FragmentCharacterListBinding
         get() = _binding!!
@@ -35,38 +33,18 @@ class CharacterListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        (requireContext().applicationContext as CharacterListComponentProvider)
-            .provideCharacterListComponent()
-            .inject(this)
-
-        val characterAdapter = CharactersAdapter()
         binding.charactersList.apply {
             adapter = characterAdapter
             layoutManager = LinearLayoutManager(context)
         }
-        val service = retrofit.create(CharacterListEndpoint::class.java)
         lifecycleScope.launch {
-            val characters = withContext(Dispatchers.IO) {
-                service.loadCharacters().results.map { dto ->
-                    CharacterModel(
-                        name = dto.name,
-                        status = when (dto.status) {
-                            "Alive" -> CharacterStatus.ALIVE
-                            "Dead" -> CharacterStatus.DEAD
-                            else -> CharacterStatus.UNKNOWN
-                        },
-                        species = dto.species,
-                        gender = when (dto.gender) {
-                            "Male" -> CharacterGender.MALE
-                            "Female" -> CharacterGender.FEMALE
-                            "Genderless" -> CharacterGender.GENDERLESS
-                            else -> CharacterGender.UNKNOWN
-                        },
-                        image = dto.image
-                    )
-                }
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                characterViewModel.characterFlow.collect(::render)
             }
-            characterAdapter.setCharacters(characters)
         }
+    }
+
+    private fun render(data: List<CharacterData>) {
+        characterAdapter.setCharacters(data)
     }
 }

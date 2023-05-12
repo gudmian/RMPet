@@ -1,6 +1,6 @@
-package com.example.rmpet.characterlist.ui
+package com.example.rmpet.characterlist.domain
 
-class CharacterModel(
+class CharacterData(
     val name: String,
     val status: CharacterStatus,
     val species: String,

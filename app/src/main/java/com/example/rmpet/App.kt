@@ -1,14 +1,23 @@
 package com.example.rmpet
 
 import android.app.Application
-import com.example.rmpet.characterlist.di.CharacterListComponent
-import com.example.rmpet.characterlist.di.CharacterListComponentProvider
-import com.example.rmpet.di.DaggerAppComponent
+import com.example.rmpet.characterlist.di.characterListModule
+import com.example.rmpet.di.appModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
-class App : Application(), CharacterListComponentProvider {
-    private val appComponent by lazy {
-        DaggerAppComponent.factory().create(applicationContext)
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        startKoin {
+            androidLogger()
+            androidContext(this@App)
+            modules(
+                appModule,
+                characterListModule
+            )
+        }
     }
-
-    override fun provideCharacterListComponent(): CharacterListComponent = appComponent.plusCharacterListComponent()
 }
