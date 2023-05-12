@@ -6,5 +6,5 @@ import retrofit2.http.GET
 interface CharacterListEndpoint {
 
     @GET("api/character")
-    fun loadCharacters(): Call<CharacterDataDto>
+    suspend fun loadCharacters(): CharacterDataDto
 }

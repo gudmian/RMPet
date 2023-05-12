@@ -1,14 +1,14 @@
 package com.example.rmpet.di
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -16,15 +16,6 @@ private const val BASE_URL = "https://rickandmortyapi.com"
 
 @Module
 object AppConfigurationModule {
-
-    @Provides
-    @Singleton
-    fun providesGson(): Gson {
-        return GsonBuilder()
-            .setLenient()
-            .disableHtmlEscaping()
-            .create()
-    }
 
     @Provides
     @Singleton
@@ -47,8 +38,8 @@ object AppConfigurationModule {
 
     @Provides
     @Singleton
-    fun providesConverterFactory(gson: Gson): Converter.Factory {
-        return GsonConverterFactory.create(gson)
+    fun providesConverterFactory(): Converter.Factory {
+        return Json.asConverterFactory("application/json".toMediaType())
     }
 
     @Provides

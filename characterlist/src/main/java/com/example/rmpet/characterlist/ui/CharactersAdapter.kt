@@ -3,6 +3,7 @@ package com.example.rmpet.characterlist.ui
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.rmpet.characterlist.R
 import com.example.rmpet.characterlist.databinding.ListItemCharacterBinding
 
@@ -36,6 +37,7 @@ class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.Holder>() {
             binding.listItemCharacterSpecies.text = model.species
             binding.listItemCharacterGender.setImageResource(getGenderImage(model.gender))
             binding.listItemCharacterStatus.setImageResource(getCharacterStatus(model.status))
+            Glide.with(binding.root).load(model.image).into(binding.listItemCharacterImage)
         }
 
         private fun getGenderImage(gender: CharacterGender): Int = when (gender) {

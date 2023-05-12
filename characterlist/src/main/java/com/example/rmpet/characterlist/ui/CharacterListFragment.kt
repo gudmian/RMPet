@@ -1,19 +1,18 @@
 package com.example.rmpet.characterlist.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.rmpet.characterlist.data.remote.CharacterDataDto
 import com.example.rmpet.characterlist.data.remote.CharacterListEndpoint
 import com.example.rmpet.characterlist.databinding.FragmentCharacterListBinding
 import com.example.rmpet.characterlist.di.CharacterListComponentProvider
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import javax.inject.Inject
 
@@ -39,42 +38,35 @@ class CharacterListFragment : Fragment() {
         (requireContext().applicationContext as CharacterListComponentProvider)
             .provideCharacterListComponent()
             .inject(this)
+
         val characterAdapter = CharactersAdapter()
         binding.charactersList.apply {
             adapter = characterAdapter
             layoutManager = LinearLayoutManager(context)
         }
-        retrofit.create(CharacterListEndpoint::class.java).loadCharacters()
-            .enqueue(object : Callback<CharacterDataDto> {
-                override fun onResponse(call: Call<CharacterDataDto>, response: Response<CharacterDataDto>) {
-                    response.body()?.results?.map { dto ->
-                        CharacterModel(
-                            name = dto.name,
-                            status = when (dto.status) {
-                                "Alive" -> CharacterStatus.ALIVE
-                                "Dead" -> CharacterStatus.DEAD
-                                else -> CharacterStatus.UNKNOWN
-                            },
-                            species = dto.species,
-                            gender = when (dto.gender) {
-                                "Male" -> CharacterGender.MALE
-                                "Female" -> CharacterGender.FEMALE
-                                "Genderless" -> CharacterGender.GENDERLESS
-                                else -> CharacterGender.UNKNOWN
-                            },
-                            image = dto.image
-                        )
-                    }?.let(characterAdapter::setCharacters)
+        val service = retrofit.create(CharacterListEndpoint::class.java)
+        lifecycleScope.launch {
+            val characters = withContext(Dispatchers.IO) {
+                service.loadCharacters().results.map { dto ->
+                    CharacterModel(
+                        name = dto.name,
+                        status = when (dto.status) {
+                            "Alive" -> CharacterStatus.ALIVE
+                            "Dead" -> CharacterStatus.DEAD
+                            else -> CharacterStatus.UNKNOWN
+                        },
+                        species = dto.species,
+                        gender = when (dto.gender) {
+                            "Male" -> CharacterGender.MALE
+                            "Female" -> CharacterGender.FEMALE
+                            "Genderless" -> CharacterGender.GENDERLESS
+                            else -> CharacterGender.UNKNOWN
+                        },
+                        image = dto.image
+                    )
                 }
-
-                override fun onFailure(call: Call<CharacterDataDto>, t: Throwable) {
-                    Log.e("CHRES", "CHRES onFailure")
-                }
-            })
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) = CharacterListFragment()
+            }
+            characterAdapter.setCharacters(characters)
+        }
     }
 }
